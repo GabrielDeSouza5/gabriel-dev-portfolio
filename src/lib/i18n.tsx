@@ -112,6 +112,12 @@ const pt: Dict = {
   "admin.confirmDelete": "Excluir este projeto permanentemente?",
   "admin.backToSite": "Voltar ao site",
   "admin.dashboard": "Projetos",
+  "admin.accessCodeTitle": "Código de acesso",
+  "admin.accessCodeDescription": "Informe o código para continuar até o painel.",
+  "admin.accessCode": "Código de acesso",
+  "admin.invalidAccessCode": "Código de acesso incorreto.",
+  "admin.accessCodeError": "Não foi possível validar o código. Tente novamente.",
+  "admin.continue": "Continuar",
 };
 
 const en: Dict = {
@@ -216,6 +222,12 @@ const en: Dict = {
   "admin.confirmDelete": "Permanently delete this project?",
   "admin.backToSite": "Back to site",
   "admin.dashboard": "Projects",
+  "admin.accessCodeTitle": "Access code",
+  "admin.accessCodeDescription": "Enter the code to continue to the dashboard.",
+  "admin.accessCode": "Access code",
+  "admin.invalidAccessCode": "Incorrect access code.",
+  "admin.accessCodeError": "The code could not be validated. Try again.",
+  "admin.continue": "Continue",
 };
 
 const dicts: Record<Lang, Dict> = { pt, en };

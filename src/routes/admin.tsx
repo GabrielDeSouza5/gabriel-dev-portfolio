@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { verifyAdminAccess } from "@/lib/admin-access.functions";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import {
@@ -46,6 +47,11 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const { session, isAdmin, loading } = useAuth();
+  const [accessVerified, setAccessVerified] = useState(false);
+
+  useEffect(() => {
+    setAccessVerified(false);
+  }, [session?.user.id]);
 
   if (loading) {
     return (
@@ -57,6 +63,9 @@ function AdminPage() {
 
   if (!session) return <LoginView />;
   if (!isAdmin) return <NoAccessView />;
+  if (!accessVerified) {
+    return <AccessCodeView onVerified={() => setAccessVerified(true)} />;
+  }
   return <Dashboard />;
 }
 
@@ -157,6 +166,66 @@ function NoAccessView() {
           <LogOut className="h-4 w-4" />
           {t("admin.logout")}
         </button>
+      </div>
+    </div>
+  );
+}
+
+function AccessCodeView({ onVerified }: { onVerified: () => void }) {
+  const { t } = useI18n();
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+
+    try {
+      const valid = await verifyAdminAccess({ data: { code } });
+      if (!valid) {
+        setError(t("admin.invalidAccessCode"));
+        return;
+      }
+      onVerified();
+    } catch {
+      setError(t("admin.accessCodeError"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-4">
+      <div className="w-full max-w-sm">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-soft">
+          <h1 className="text-2xl font-bold">{t("admin.accessCodeTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("admin.accessCodeDescription")}
+          </p>
+          <form onSubmit={submit} className="mt-6 space-y-4">
+            <input
+              type="password"
+              required
+              autoFocus
+              autoComplete="off"
+              placeholder={t("admin.accessCode")}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-ring"
+            />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <button
+              type="submit"
+              disabled={busy}
+              className="hover-lift flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+              {t("admin.continue")}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
